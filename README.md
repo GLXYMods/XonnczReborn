@@ -1,16 +1,4 @@
-# ii's Stupid Template
-ii's Stupid Template is a mod menu template for Gorilla Tag with custom categories and the maximum amount of customization possible. This template is meant for more advanced users, so if you're a new menu creator, this could be difficult for you.
-
-## Do I need permission to use this?
-No, this template is free and public for anyone to use. You are welcome to utilize it for your projects, modify it to suit your needs, and share it with others. We believe in a collaborative and open community where resources are accessible to all. Just don't skid, cause skidding is bad.
-
----
-
-# Installation
-
-- Download the release from [here](https://github.com/iiDk-the-actual/iis.Stupid.Template/releases/latest)
-- Change your `<GamePath>` (Gorilla Tag directory) in `Directory.Build.props` if required
-- Change the menu name in `PluginInfo.cs`
-- Edit the menu visuals in `Menu/Settings.cs`
-- Add buttons in `Menu/Buttons.cs`
-- Build with `Ctrl` + `Shift` + `B`, it will get put in your plugins folder automatically
+# X O N N C Z || R E B O R N
+The Gorilla Tag mod menu XONNCZ REBORN is an open source mod menu for people that want to learn how to code. And Also For People Who Think That The Menu Is A Malware / Rat / Trojan / Virus / whatever the fuck you want to call it!
+# X O N N C Z || R E B O R N. Is
+A sleek and feature-rich open-source mod menu designed for Gorilla Tag enthusiasts. XONNCZ || REBORN offers a fully customizable and user-friendly interface that enhances gameplay while prioritizing community guidelines and fair play. Built with transparency and accessibility in mind, this mod menu invites developers to contribute, adapt, and expand its capabilities. Whether you're exploring new tools or sharing creative enhancements, XONNCZ || REBORN sets a new standard for modding in virtual reality. This Was Definitly Me :)
