@@ -1,4 +1,4 @@
 # X O N N C Z || R E B O R N
 The Gorilla Tag mod menu XONNCZ REBORN is an open source mod menu for people that want to learn how to code. And Also For People Who Think That The Menu Is A Malware / Rat / Trojan / Virus / whatever the fuck you want to call it!
-# X O N N C Z || R E B O R N. Is
+# X O N N C Z || R E B O R N Is
 A sleek and feature-rich open-source mod menu designed for Gorilla Tag enthusiasts. XONNCZ || REBORN offers a fully customizable and user-friendly interface that enhances gameplay while prioritizing community guidelines and fair play. Built with transparency and accessibility in mind, this mod menu invites developers to contribute, adapt, and expand its capabilities. Whether you're exploring new tools or sharing creative enhancements, XONNCZ || REBORN sets a new standard for modding in virtual reality. This Was Definitly Me :)
