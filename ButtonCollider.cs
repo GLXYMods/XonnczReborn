@@ -1,4 +1,5 @@
 using Photon.Pun;
+using StupidTemplate.Menu;
 using UnityEngine;
 using static StupidTemplate.Menu.Main;
 using static StupidTemplate.Settings;
@@ -10,6 +11,8 @@ namespace StupidTemplate.Classes
 		public string relatedText;
 
 		public static float buttonCooldown = 0f;
+
+		public static int buttonSound = 114;
 		
 		public void OnTriggerEnter(Collider collider)
 		{
@@ -17,7 +20,7 @@ namespace StupidTemplate.Classes
 			{
                 buttonCooldown = Time.time + 0.2f;
                 GorillaTagger.Instance.StartVibration(rightHanded, GorillaTagger.Instance.tagHapticStrength / 2f, GorillaTagger.Instance.tagHapticDuration / 2f);
-                GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(114, rightHanded, 0.4f);
+				GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(buttonSound, rightHanded, 0.4f);
 				Toggle(this.relatedText);
             }
 		}
