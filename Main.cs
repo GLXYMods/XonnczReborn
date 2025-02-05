@@ -1,16 +1,26 @@
-﻿using BepInEx;
+using BepInEx;
+using GorillaTagScripts;
 using HarmonyLib;
 using Photon.Pun;
 using StupidTemplate.Classes;
 using StupidTemplate.Mods;
 using StupidTemplate.Notifications;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 using static StupidTemplate.Menu.Buttons;
+using static StupidTemplate.Menu.Main;
 using static StupidTemplate.Settings;
+using static Ui;
+using Button = StupidTemplate.Classes.Button;
 
 namespace StupidTemplate.Menu
 {
@@ -18,6 +28,261 @@ namespace StupidTemplate.Menu
     [HarmonyPatch("LateUpdate", MethodType.Normal)]
     public class Main : MonoBehaviour
     {
+        public static int fontC = 0;
+        public static Font Arial = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+        public static Font Sans = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 24);
+        public static Font AgencyFB = Font.CreateDynamicFontFromOSFont("Agency FB", 24);
+        public static Font consolas = Font.CreateDynamicFontFromOSFont("Consolas", 24);
+        public static Font Verdana = Font.CreateDynamicFontFromOSFont("Verdana", 24);
+        public static Font ubuntu = Font.CreateDynamicFontFromOSFont("Candara", 24);
+        public static Font MSGOTHIC = Font.CreateDynamicFontFromOSFont("MS Gothic", 24);
+        public static Font impact = Font.CreateDynamicFontFromOSFont("Impact", 24);
+        public static bool thickk = true;
+        public static void changemenufont()
+        {
+            fontC++;
+            if (fontC > 6)
+            {
+                fontC = 0;
+            }
+            if (fontC < 0)
+            {
+                fontC = 6;
+            }
+
+            if (fontC == 0)
+            {
+                currentFont = Arial;
+            }
+
+            if (fontC == 1)
+            {
+                currentFont = Sans;
+            }
+            if (fontC == 2)
+            {
+                currentFont = Verdana;
+            }
+            if (fontC == 3)
+            {
+                currentFont = consolas;
+            }
+            if (fontC == 4)
+            {
+                currentFont = ubuntu;
+            }
+            if (fontC == 5)
+            {
+                currentFont = MSGOTHIC;
+            }
+            if (fontC == 6)
+            {
+                currentFont = impact;
+            }
+        }
+
+        public static int btn = 0;
+        public static void changebuttonsound()
+        {
+            btn++;
+            if (btn > 15)
+            {
+                btn = 0;
+            }
+            if (btn < 0)
+            {
+                btn = 15;
+            }
+
+            if (btn == 0)
+            {
+                Button.buttonSound = 114;
+            }
+
+            if (btn == 1)
+            {
+                Button.buttonSound = 123;
+            }
+
+            if (btn == 2)
+            {
+                Button.buttonSound = 138;
+            }
+
+            if (btn == 3)
+            {
+                Button.buttonSound = 146;
+            }
+
+            if (btn == 4)
+            {
+                Button.buttonSound = 147;
+            }
+
+            if (btn == 5)
+            {
+                Button.buttonSound = 140;
+            }
+
+            if (btn == 6)
+            {
+                Button.buttonSound = 85;
+            }
+
+            if (btn == 7)
+            {
+                Button.buttonSound = 84;
+            }
+
+            if (btn == 8)
+            {
+                Button.buttonSound = 92;
+            }
+
+            if (btn == 9)
+            {
+                Button.buttonSound = 91;
+            }
+            if (btn == 10)
+            {
+                Button.buttonSound = 55;
+            }
+            if (btn == 11)
+            {
+                Button.buttonSound = 73;
+            }
+            if (btn == 12)
+            {
+                Button.buttonSound = 51;
+            }
+            if (btn == 13)
+            {
+                Button.buttonSound = 15;
+            }
+            if (btn == 14)
+            {
+                Button.buttonSound = 32;
+            }
+            if (btn == 15)
+            {
+                Button.buttonSound = 64;
+            }
+        }
+
+        public static bool sound1 = false;
+        public static bool sound2 = false;
+        public static bool sound3 = false;
+        public static bool sound4 = false;
+        public static bool sound5 = false;
+        public static bool sound6 = false;
+        public static bool sound7 = false;
+        public static bool sound8 = false;
+        public static bool sound9 = false;
+        public static bool sound10 = false;
+        public static bool sound11 = false;
+        public static bool sound12 = false;
+        public static bool sound13 = false;
+        public static bool realsoundOn = true;
+
+        public static bool pagebuttons = true;
+
+        public static void Save()
+        {
+            List<String> list = new List<String>();
+            foreach (ButtonInfo[] button in Menu.Buttons.buttons)
+            {
+                foreach (ButtonInfo button2 in button)
+                {
+                    if (button2.enabled == true)
+                    {
+                        list.Add(button2.buttonText + button2.overlapText);
+                    }
+                }
+            }
+            System.IO.Directory.CreateDirectory("XonnczReborn");
+            System.IO.File.WriteAllLines("XonnczReborn\\Prefabs.txt", list);
+            NotifiLib.SendNotification("<color=grey>[</color><color=green>SUCCESSFULLY</color><color=grey>]</color> Saved Mods!");
+        }
+        public static void SaveSettings()
+        {
+            List<String> list = new List<String>();
+            foreach (ButtonInfo[] button in Menu.Buttons.buttons)
+            {
+                foreach (ButtonInfo button2 in button)
+                {
+                    if (button2.enabled == true)
+                    {
+                        list.Add(button2.buttonText + button2.overlapText);
+                    }
+                }
+            }
+            Directory.CreateDirectory("XonnczReborn");
+            File.WriteAllLines("XonnczReborn\\Settings.txt", list);
+            string text4 = string.Concat(new string[]
+            {
+               btn.ToString(),
+               "\n",
+               fontC.ToString(),
+               "\n",
+               Visual.t.ToString(),
+               "\n",
+            });
+            File.WriteAllText("XonnczReborn\\Settings.txt", text4.ToString());
+            NotifiLib.SendNotification("<color=grey>[</color><color=green>SUCCESSFULLY</color><color=grey>]</color> Saved Settings!");
+        }
+
+        public static void LoadSettings()
+        {
+            string[] array = File.ReadAllLines("XonnczReborn\\Settings.txt");
+            foreach (string b in array)
+            {
+                foreach (ButtonInfo[] button in Buttons.buttons)
+                {
+                    foreach (ButtonInfo button2 in button)
+                    {
+                        if (button2.buttonText == b)
+                        {
+                            button2.enabled = button2.isTogglable;
+                        }
+                    }                   
+                }
+            }
+            try
+            {
+                string text3 = File.ReadAllText("XonnczReborn\\Settings.txt");
+                string[] array4 = text3.Split(new string[] { "\n" }, StringSplitOptions.None);
+                btn = int.Parse(array4[0]) - 1;
+                changebuttonsound();
+                fontC = int.Parse(array4[1]) - 1;
+                changemenufont();
+                Visual.t = int.Parse(array4[2]) - 1;
+                Visual.ChangeMenuTheme();
+            }
+            catch { /* skibidi sigma rizz :) */ }
+            NotifiLib.SendNotification("<color=grey>[</color><color=green>SUCCESSFULLY</color><color=grey>]</color> Loaded Settings!");
+        }
+
+        public static void Load()
+        {
+            String[] thing = System.IO.File.ReadAllLines("XonnczReborn\\Prefabs.txt");
+            foreach (String thing2 in thing)
+            {
+                foreach (ButtonInfo[] button in Menu.Buttons.buttons)
+                {
+                    foreach (ButtonInfo button2 in button)
+                    {
+                        if (button2.buttonText + button2.overlapText == thing2)
+                        {
+                            button2.enabled = true;
+                        }
+                    }
+                }               
+            }
+            NotifiLib.SendNotification("<color=grey>[</color><color=green>SUCCESSFULLY</color><color=grey>]</color> Loaded Mods!");
+        }
+
+
+
         // Constant
         public static void Prefix()
         {
@@ -56,7 +321,6 @@ namespace StupidTemplate.Menu
                             {
                                 comp.velocity = GorillaLocomotion.Player.Instance.leftHandCenterVelocityTracker.GetAverageVelocity(true, 0);
                             }
-
                             UnityEngine.Object.Destroy(menu, 2);
                             menu = null;
 
@@ -103,14 +367,139 @@ namespace StupidTemplate.Menu
                 } catch (Exception exc)
                 {
                     UnityEngine.Debug.LogError(string.Format("{0} // Error with executing mods at {1}: {2}", PluginInfo.Name, exc.StackTrace, exc.Message));
-                }
+                }           
         }
 
         // Functions
 
+        public static int Fade = 0;
+
+        public static bool ClearMenu = false;
+
+        public static void ChangeFadingColor1()
+        {
+            Fade++;
+            if (Fade < 0)
+            {
+                Fade = 8;
+            }
+            if (Fade > 8)
+            {
+                Fade = 0;
+            }
+
+            if (Fade == 0)
+            {
+                fadingcolor1 = Color.red;
+                GetIndex("Faded Menu Color 1").overlapText = "Faded Menu Color[<color=red>Red</color>]";
+            }
+            if (Fade == 1)
+            {
+                fadingcolor1 = Color.blue;
+                GetIndex("Faded Menu Color 1").overlapText = "Faded Menu Color[<color=blue>Blue</color>]";
+            }
+            if (Fade == 2)
+            {
+                fadingcolor1 = Color.green;
+                GetIndex("Faded Menu Color 1").overlapText = "Faded Menu Color[<color=green>Green</color>]";
+            }
+            if (Fade == 3)
+            {
+                fadingcolor1 = Color.cyan;
+                GetIndex("Faded Menu Color 1").overlapText = "Faded Menu Color[<color=cyan>Cyan</color>]";
+            }
+            if (Fade == 4)
+            {
+                fadingcolor1 = Color.magenta;
+                GetIndex("Faded Menu Color 1").overlapText = "Faded Menu Color[<color=magenta>Magenta</color>]";
+            }
+            if (Fade == 5)
+            {
+                fadingcolor1 = Color.black;
+                GetIndex("Faded Menu Color 1").overlapText = "Faded Menu Color[<color=black>Black</color>]";
+            }
+            if (Fade == 6)
+            {
+                fadingcolor1 = Color.grey;
+                GetIndex("Faded Menu Color 1").overlapText = "Faded Menu Color[<color=grey>Grey</color>]";
+            }
+            if (Fade == 7)
+            {
+                fadingcolor1 = Color.yellow;
+                GetIndex("Faded Menu Color 1").overlapText = "Faded Menu Color[<color=yellow>Yellow</color>]";
+            }
+            if (Fade == 8)
+            {
+                fadingcolor1 = Color.white;
+                GetIndex("Faded Menu Color 1").overlapText = "Faded Menu Color[<color=white>White</color>]";
+            }
+        }
+        public static void ChangeFadingColor2()
+        {
+            Fade++;
+            if (Fade < 0)
+            {
+                Fade = 8;
+            }
+            if (Fade > 8)
+            {
+                Fade = 0;
+            }
+
+            if (Fade == 0)
+            {
+                fadingcolor2 = Color.red;
+                GetIndex("Faded Menu Color 2").overlapText = "Faded Menu Color[<color=red>Red</color>]";
+            }
+            if (Fade == 1)
+            {
+                fadingcolor2 = Color.blue;
+                GetIndex("Faded Menu Color 2").overlapText = "Faded Menu Color[<color=blue>Blue</color>]";
+            }
+            if (Fade == 2)
+            {
+                fadingcolor2 = Color.green;
+                GetIndex("Faded Menu Color 2").overlapText = "Faded Menu Color[<color=green>Green</color>]";
+            }
+            if (Fade == 3)
+            {
+                fadingcolor2 = Color.cyan;
+                GetIndex("Faded Menu Color 2").overlapText = "Faded Menu Color[<color=cyan>Cyan</color>]";
+            }
+            if (Fade == 4)
+            {
+                fadingcolor2 = Color.magenta;
+                GetIndex("Faded Menu Color 2").overlapText = "Faded Menu Color[<color=magenta>Magenta</color>]";
+            }
+            if (Fade == 5)
+            {
+                fadingcolor2 = Color.black;
+                GetIndex("Faded Menu Color 2").overlapText = "Faded Menu Color[<color=black>Black</color>]";
+            }
+            if (Fade == 6)
+            {
+                fadingcolor2 = Color.grey;
+                GetIndex("Faded Menu Color 2").overlapText = "Faded Menu Color[<color=grey>Grey</color>]";
+            }
+            if (Fade == 7)
+            {
+                fadingcolor2 = Color.yellow;
+                GetIndex("Faded Menu Color 2").overlapText = "Faded Menu Color[<color=yellow>Yellow</color>]";
+            }
+            if (Fade == 8)
+            {
+                fadingcolor2 = Color.white;
+                GetIndex("Faded Menu Color 2").overlapText = "Faded Menu Color[<color=white>White</color>]";
+            }
+        }
+
         public static Color MenuColor = new Color32(255, 0, 0, 255);
+        public static Color fadingcolor1 = Color.red;
+        public static Color fadingcolor2 = Color.black;
         public static Color OutlineColor = new Color32(0, 0, 0, 255);
         public static Color enabledColor = MenuColor;
+        public static bool fading = false;
+
         public static void CreateMenu()
         {
             // Menu Holder
@@ -128,8 +517,47 @@ namespace StupidTemplate.Menu
                 menuBackground.transform.rotation = Quaternion.identity;
                 menuBackground.transform.localScale = menuSize;
                 menuBackground.GetComponent<Renderer>().material.color = MenuColor;
-                ColorChanger colorChanger = menuBackground.AddComponent<ColorChanger>();
-                colorChanger.Start();
+                if (fading) 
+                { 
+                    GradientColorKey[] array = new GradientColorKey[3];
+                    array[0].color = fadingcolor1;
+                    array[0].time = 0f;
+                    array[1].color = fadingcolor2;
+                    array[1].time = 0.5f;
+                    array[2].color = fadingcolor1;
+                    array[2].time = 1f;
+                    ColorChanger faded = menuBackground.AddComponent<ColorChanger>();
+                    faded.colorInfo = new ExtGradient
+                    {
+                        colors = array
+                    };
+                    faded.Start();
+                }
+                else
+                {
+                    GradientColorKey[] array = new GradientColorKey[3];
+                    array[0].color = MenuColor;
+                    array[0].time = 0f;
+                    array[1].color = MenuColor;
+                    array[1].time = 0.5f;
+                    array[2].color = MenuColor;
+                    array[2].time = 1f;
+                    ColorChanger faded = menuBackground.AddComponent<ColorChanger>();
+                    faded.colorInfo = new ExtGradient
+                    {
+                        colors = array
+                    };
+                    faded.Start();
+                } 
+                if (ClearMenu) 
+                {
+                    menuBackground.GetComponent<Renderer>().enabled = false;
+                }
+                else
+                {
+                    menuBackground.GetComponent<Renderer>().enabled = true;
+                }    
+                
                 menuBackground.transform.position = new Vector3(0.05f, 0f, 0f);
 
                 GameObject outline = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -141,8 +569,15 @@ namespace StupidTemplate.Menu
                 outline.GetComponent<Renderer>().material.color = OutlineColor;
                 ColorChanger colorChanger2 = outline.AddComponent<ColorChanger>();
                 colorChanger2.Start();
-                outline.transform.position = new Vector3(0.03f, 0f, 0f);
-                outline.transform.localScale = new Vector3(0.2f, 1.2f, 1.1f);
+                outline.transform.position = new Vector3(0.05f, 0f, 0f);
+                if (thickk) 
+                {
+                    outline.transform.localScale = new Vector3(0.08f, 1.2f, 1.1f);
+                }
+                else
+                {
+                    outline.transform.localScale = new Vector3(0.08f, 1.16f, 1.07f);
+                }
 
 
 
@@ -218,15 +653,14 @@ namespace StupidTemplate.Menu
                         disconnectbutton.GetComponent<BoxCollider>().isTrigger = true;
                         disconnectbutton.transform.parent = menu.transform;
                         disconnectbutton.transform.rotation = Quaternion.identity;
-                        disconnectbutton.transform.localScale = new Vector3(0.06f, 0.5f, 0.08f);
-                        disconnectbutton.transform.localPosition = new Vector3(0.56f, 0f, -0.4f);
+                        disconnectbutton.transform.localScale = new Vector3(0.06f, 0.5f, 0.12f);
+                        disconnectbutton.transform.localPosition = new Vector3(0.63f, 0.26f, -0.4f);
                         disconnectbutton.GetComponent<Renderer>().material.color = buttonColors[0].colors[0].color;
                         disconnectbutton.AddComponent<Classes.Button>().relatedText = "Disconnect";
-
-                        colorChanger = disconnectbutton.AddComponent<ColorChanger>();
-                        colorChanger.colorInfo = buttonColors[0];
-                        colorChanger.Start();
-
+                        ColorChanger colorChangers = menuBackground.AddComponent<ColorChanger>();
+                        colorChangers = disconnectbutton.AddComponent<ColorChanger>();
+                        colorChangers.colorInfo = buttonColors[0];
+                        colorChangers.Start();              
                         Text discontext = new GameObject
                         {
                             transform =
@@ -241,97 +675,121 @@ namespace StupidTemplate.Menu
                         discontext.alignment = TextAnchor.MiddleCenter;
                         discontext.resizeTextForBestFit = true;
                         discontext.resizeTextMinSize = 0;
-
                         RectTransform rectt = discontext.GetComponent<RectTransform>();
                         rectt.localPosition = Vector3.zero;
                         rectt.sizeDelta = new Vector2(0.2f, 0.03f);
-                        rectt.localPosition = new Vector3(0.064f, 0f, -0.15f);
+                        rectt.localPosition = new Vector3(0.067f, disconnectbutton.transform.position.y, -0.15f);
                         rectt.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
+                        if (ClearMenu)
+                        {
+                            disconnectbutton.GetComponent<Renderer>().enabled = false;
+                        }
+                        else
+                        {
+                            disconnectbutton.GetComponent<Renderer>().enabled = true;
+                        }
                     }
 
-                // Page Buttons
-                    GameObject gameObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    if (!UnityInput.Current.GetKey(KeyCode.Q))
-                    {
-                        gameObject.layer = 2;
-                    }
-                    UnityEngine.Object.Destroy(gameObject.GetComponent<Rigidbody>());
-                    gameObject.GetComponent<BoxCollider>().isTrigger = true;
-                    gameObject.transform.parent = menu.transform;
-                    gameObject.transform.rotation = Quaternion.identity;
-                    gameObject.transform.localScale = new Vector3(0.09f, 0.2f, 0.16f);
-                    gameObject.transform.localPosition = new Vector3(0.56f, 0.41f, -0.36f);
-                    gameObject.GetComponent<Renderer>().material.color = buttonColors[0].colors[0].color;
-                    gameObject.AddComponent<Classes.Button>().relatedText = "PreviousPage";
+             // Page Buttons
+                GameObject gameObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                if (!UnityInput.Current.GetKey(KeyCode.Q))
+                {
+                    gameObject.layer = 2;
+                }
+                UnityEngine.Object.Destroy(gameObject.GetComponent<Rigidbody>());
+                gameObject.GetComponent<BoxCollider>().isTrigger = true;
+                gameObject.transform.parent = menu.transform;
+                gameObject.transform.rotation = Quaternion.identity;
+                gameObject.transform.localScale = new Vector3(0.09f, 0.2f, 0.16f);
+                gameObject.transform.localPosition = new Vector3(0.56f, -0.15f, -0.40f);
+                gameObject.GetComponent<Renderer>().material.color = buttonColors[0].colors[0].color;
+                gameObject.AddComponent<Classes.Button>().relatedText = "PreviousPage";
+                ColorChanger colorChanger = menuBackground.AddComponent<ColorChanger>();
+                colorChanger.Start();
+                colorChanger = gameObject.AddComponent<ColorChanger>();
+                colorChanger.colorInfo = buttonColors[0];
+                colorChanger.Start();
 
-                    colorChanger = gameObject.AddComponent<ColorChanger>();
-                    colorChanger.colorInfo = buttonColors[0];
-                    colorChanger.Start();
-
-                    text = new GameObject
-                    {
-                        transform =
+                text = new GameObject
+                {
+                    transform =
                         {
                             parent = canvasObject.transform
                         }
-                    }.AddComponent<Text>();
-                    text.font = currentFont;
-                    text.text = "<";
-                    text.fontSize = 1;
-                    text.color = textColors[0];
-                    text.alignment = TextAnchor.MiddleCenter;
-                    text.resizeTextForBestFit = true;
-                    text.resizeTextMinSize = 0;
-                    component = text.GetComponent<RectTransform>();
-                    component.localPosition = Vector3.zero;
-                    component.sizeDelta = new Vector2(0.2f, 0.03f);
-                    component.localPosition = new Vector3(0.064f, 0.123f, -0.14f);
-                    component.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
+                }.AddComponent<Text>();
+                text.font = currentFont;
+                text.text = "<";
+                text.fontSize = 1;
+                text.color = textColors[0];
+                text.alignment = TextAnchor.MiddleCenter;
+                text.resizeTextForBestFit = true;
+                text.resizeTextMinSize = 0;
+                component = text.GetComponent<RectTransform>();
+                component.localPosition = Vector3.zero;
+                component.sizeDelta = new Vector2(0.2f, 0.03f);
+                component.localPosition = new Vector3(0.064f, gameObject.transform.position.y, gameObject.transform.position.z);
+                if (ClearMenu)
+                {
+                    gameObject.GetComponent<Renderer>().enabled = false;
+                }
+                else
+                {
+                    gameObject.GetComponent<Renderer>().enabled = true;
+                }
+                component.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
 
-                    gameObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    if (!UnityInput.Current.GetKey(KeyCode.Q))
-                    {
-                        gameObject.layer = 2;
-                    }
-                    UnityEngine.Object.Destroy(gameObject.GetComponent<Rigidbody>());
-                    gameObject.GetComponent<BoxCollider>().isTrigger = true;
-                    gameObject.transform.parent = menu.transform;
-                    gameObject.transform.rotation = Quaternion.identity;
-                    gameObject.transform.localScale = new Vector3(0.09f, 0.2f, 0.16f);
-                    gameObject.transform.localPosition = new Vector3(0.56f, -0.41f, -0.36f);
-                    gameObject.GetComponent<Renderer>().material.color = buttonColors[0].colors[0].color;
-                    gameObject.AddComponent<Classes.Button>().relatedText = "NextPage";
+                gameObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                if (!UnityInput.Current.GetKey(KeyCode.Q))
+                {
+                    gameObject.layer = 2;
+                }
+                UnityEngine.Object.Destroy(gameObject.GetComponent<Rigidbody>());
+                gameObject.GetComponent<BoxCollider>().isTrigger = true;
+                gameObject.transform.parent = menu.transform;
+                gameObject.transform.rotation = Quaternion.identity;
+                gameObject.transform.localScale = new Vector3(0.09f, 0.2f, 0.16f);
+                gameObject.transform.localPosition = new Vector3(0.56f, -0.41f, -0.40f);
+                gameObject.GetComponent<Renderer>().material.color = buttonColors[0].colors[0].color;
+                gameObject.AddComponent<Classes.Button>().relatedText = "NextPage";
 
-                    colorChanger = gameObject.AddComponent<ColorChanger>();
-                    colorChanger.colorInfo = buttonColors[0];
-                    colorChanger.Start();
+                colorChanger = gameObject.AddComponent<ColorChanger>();
+                colorChanger.colorInfo = buttonColors[0];
+                colorChanger.Start();
 
-                    text = new GameObject
-                    {
-                        transform =
+                text = new GameObject
+                {
+                    transform =
                         {
                             parent = canvasObject.transform
                         }
-                    }.AddComponent<Text>();
-                    text.font = currentFont;
-                    text.text = ">";
-                    text.fontSize = 1;
-                    text.color = textColors[0];
-                    text.alignment = TextAnchor.MiddleCenter;
-                    text.resizeTextForBestFit = true;
-                    text.resizeTextMinSize = 0;
-                    component = text.GetComponent<RectTransform>();
-                    component.localPosition = Vector3.zero;
-                    component.sizeDelta = new Vector2(0.2f, 0.03f);
-                    component.localPosition = new Vector3(0.064f, -0.123f, -0.14f);
-                    component.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
+                }.AddComponent<Text>();
+                text.font = currentFont;
+                text.text = ">";
+                text.fontSize = 1;
+                text.color = textColors[0];
+                text.alignment = TextAnchor.MiddleCenter;
+                text.resizeTextForBestFit = true;
+                text.resizeTextMinSize = 0;
+                component = text.GetComponent<RectTransform>();
+                component.localPosition = Vector3.zero;
+                component.sizeDelta = new Vector2(0.2f, 0.03f);
+                component.localPosition = new Vector3(0.064f, -0.123f, gameObject.transform.position.z);
+                component.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
+                if (ClearMenu) 
+                {
+                    gameObject.GetComponent<Renderer>().enabled = false;
+                }
+                else
+                {
+                    gameObject.GetComponent<Renderer>().enabled = true;
+                }
 
-                // Mod Buttons
-                    ButtonInfo[] activeButtons = buttons[buttonsType].Skip(pageNumber * buttonsPerPage).Take(buttonsPerPage).ToArray();
-                    for (int i = 0; i < activeButtons.Length; i++)
-                    {
-                        CreateButton(i * 0.1f, activeButtons[i]);
-                    }
+            // Mod Buttons
+            ButtonInfo[] activeButtons = buttons[buttonsType].Skip(pageNumber * buttonsPerPage).Take(buttonsPerPage).ToArray();
+            for (int i = 0; i < activeButtons.Length; i++)
+            {
+                CreateButton(i * 0.1f, activeButtons[i]);
+            }
         }
 
         public static void CreateButton(float offset, ButtonInfo method)
@@ -392,6 +850,14 @@ namespace StupidTemplate.Menu
             component.sizeDelta = new Vector2(.2f, .03f);
             component.localPosition = new Vector3(.064f, 0, .111f - offset / 2.6f);
             component.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
+            if (ClearMenu)
+            {
+                gameObject.GetComponent<Renderer>().enabled = false;
+            }
+            else
+            {
+                gameObject.GetComponent<Renderer>().enabled = true;
+            }
         }
 
         public static void RecreateMenu()
@@ -432,17 +898,12 @@ namespace StupidTemplate.Menu
                 catch { }
                 if (TPC != null)
                 {
-                    TPC.transform.position = new Vector3(-999f, -999f, -999f);
-                    TPC.transform.rotation = Quaternion.identity;
-                    GameObject bg = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    bg.transform.localScale = new Vector3(10f, 10f, 0.01f);
-                    bg.transform.transform.position = TPC.transform.position + TPC.transform.forward;
-                    bg.GetComponent<Renderer>().material.color = MenuColor;
-                    GameObject.Destroy(bg, Time.deltaTime);
+                    TPC.transform.position = new Vector3(-64f, 3.4f, -65f);
+                    TPC.transform.rotation = Quaternion.identity;                    
                     menu.transform.parent = TPC.transform;
-                    menu.transform.position = (TPC.transform.position + (Vector3.Scale(TPC.transform.forward, new Vector3(0.5f, 0.5f, 0.5f)))) + (Vector3.Scale(TPC.transform.up, new Vector3(-0.02f, -0.02f, -0.02f)));
+                    menu.transform.position = TPC.transform.position + (TPC.transform.forward * 0.5f) + (TPC.transform.up * 0f);
                     Vector3 rot = TPC.transform.rotation.eulerAngles;
-                    rot = new Vector3(rot.x - 90, rot.y + 90, rot.z);
+                    rot += new Vector3(-90f, 90f, 0f);
                     menu.transform.rotation = Quaternion.Euler(rot);
 
                     if (reference != null)
@@ -532,7 +993,7 @@ namespace StupidTemplate.Menu
                             target.enabled = !target.enabled;
                             if (target.enabled)
                             {
-                                NotifiLib.SendNotification("<color=grey>[</color><color=green>ENABLE</color><color=grey>]</color> " + target.toolTip);
+                                NotifiLib.SendNotification("<color=red>[</color><color=red>ENABLE</color><color=red>]</color> " + target.toolTip);
                                 if (target.enableMethod != null)
                                 {
                                     try { target.enableMethod.Invoke(); } catch { }
@@ -540,7 +1001,7 @@ namespace StupidTemplate.Menu
                             }
                             else
                             {
-                                NotifiLib.SendNotification("<color=grey>[</color><color=red>DISABLE</color><color=grey>]</color> " + target.toolTip);
+                                NotifiLib.SendNotification("<color=red>[</color><color=red>DISABLE</color><color=red>]</color> " + target.toolTip);
                                 if (target.disableMethod != null)
                                 {
                                     try { target.disableMethod.Invoke(); } catch { }
@@ -549,7 +1010,7 @@ namespace StupidTemplate.Menu
                         }
                         else
                         {
-                            NotifiLib.SendNotification("<color=grey>[</color><color=green>ENABLE</color><color=grey>]</color> " + target.toolTip);
+                            NotifiLib.SendNotification("<color=red>[</color><color=red>ENABLE</color><color=red>]</color> " + target.toolTip);
                             if (target.method != null)
                             {
                                 try { target.method.Invoke(); } catch { }
