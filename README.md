@@ -7,4 +7,4 @@ You should use xonncz reborn because our gorilla tag mod menu creats an admissiv
 # Is It A Rat / Malware / Trojan / Virus / whatever the fuck you want to call it!
 Nope! Idfc what you say its open source you can look for yourself 😊
 # If You Have Questions
-Please Join Our Discord At : https://discord.gg/z9CFKp7vEt
+Please Join Our Discord At : https://discord.gg/xonncz
