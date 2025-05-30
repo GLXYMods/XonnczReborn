@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
+using ExitGames.Client.Photon;
 using GorillaNetworking;
 using Photon.Pun;
+using Photon.Realtime;
 using StupidTemplate.Classes;
 using StupidTemplate.Notifications;
 using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 using UnityEngine.InputSystem;
 using static StupidTemplate.Menu.Main;
 using static StupidTemplate.Mods.Movement;
@@ -14,6 +18,95 @@ namespace StupidTemplate.Mods
 {
     public class Room
     {
+
+        public static void fpsboost()
+        {
+            Application.targetFrameRate = int.MaxValue;
+            QualitySettings.globalTextureMipmapLimit = int.MaxValue;
+            QualitySettings.masterTextureLimit = int.MaxValue;
+            QualitySettings.maxQueuedFrames = int.MaxValue;
+        }
+
+        public static void disablefpsboost()
+        {
+            Application.targetFrameRate = default;
+            QualitySettings.globalTextureMipmapLimit = default;
+            QualitySettings.masterTextureLimit = default;
+            QualitySettings.maxQueuedFrames = default;
+        }
+
+        public static void flush()
+        {
+            try
+            {
+                if (hasRemovedThisFrame)
+                {
+                    return;
+                }
+                hasRemovedThisFrame = true;
+                RaiseEventOptions options = new RaiseEventOptions
+                {
+                    CachingOption = EventCaching.RemoveFromRoomCache,
+                    TargetActors = new int[] { PhotonNetwork.LocalPlayer.ActorNumber }
+                };
+                PhotonNetwork.NetworkingClient.OpRaiseEvent(200, null, options, SendOptions.SendReliable);
+                GorillaNot.instance.rpcErrorMax = int.MaxValue;
+                GorillaNot.instance.rpcCallLimit = int.MaxValue;
+                GorillaNot.instance.logErrorMax = int.MaxValue;
+                PhotonNetwork.MaxResendsBeforeDisconnect = int.MaxValue;
+                PhotonNetwork.QuickResends = int.MaxValue;
+                PhotonNetwork.RemoveRPCs(PhotonNetwork.LocalPlayer);
+                PhotonNetwork.RemoveBufferedRPCs(GorillaTagger.Instance.myVRRig.ViewID, null, null);
+                PhotonNetwork.RemoveRPCsInGroup(int.MaxValue);
+                PhotonView playerPhotonView = GorillaTagger.Instance.myVRRig.GetComponent<PhotonView>();
+                if (playerPhotonView != null)
+                {
+                    if (playerPhotonView.Owner == null)
+                    {
+                        playerPhotonView.TransferOwnership(PhotonNetwork.LocalPlayer);
+                    }
+                    PhotonNetwork.OpCleanRpcBuffer(playerPhotonView);
+                }
+                PhotonNetwork.SendAllOutgoingCommands();
+                GorillaNot.instance.OnPlayerLeftRoom(PhotonNetwork.LocalPlayer);
+                GorillaGameManager.instance.OnPlayerLeftRoom(PhotonNetwork.LocalPlayer);
+                GorillaGameManager.instance.OnPlayerLeftRoom(PhotonNetwork.LocalPlayer);
+                GorillaGameManager.instance.OnPlayerLeftRoom(PhotonNetwork.LocalPlayer);
+                GorillaNot.instance.OnPlayerLeftRoom(PhotonNetwork.LocalPlayer);
+                try
+                {
+                    PhotonNetwork.NetworkingClient.EventReceived -= PhotonNetwork.NetworkingClient.OnEvent;
+                    PhotonNetwork.NetworkingClient.EventReceived += (eventData) =>
+                    {
+                        if (eventData.Sender != PhotonNetwork.LocalPlayer.ActorNumber)
+                        {
+                            return;
+                        }
+                    };
+                    PhotonNetwork.NetworkingClient.LoadBalancingPeer.LimitOfUnreliableCommands = 0;
+                }
+                catch (Exception ex)
+                { }
+                if (GorillaNot.instance != null)
+                {
+                    FieldInfo report = typeof(GorillaNot).GetField("sendReport", BindingFlags.NonPublic);
+                    if (report != null)
+                    {
+                        report.SetValue(GorillaNot.instance, false);
+                    }
+                    report = typeof(GorillaNot).GetField("_sendReport", BindingFlags.NonPublic);
+                    if (report != null)
+                    {
+                        report.SetValue(GorillaNot.instance, false);
+                    }
+                }
+            }
+            catch (Exception ex)
+            { Debug.Log("{ERROR} : " + ex.Message); }
+        }
+        private static bool hasRemovedThisFrame = false;
+
+
 
         public static bool dis = false;
         public static void AntiReport()
@@ -35,6 +128,7 @@ namespace StupidTemplate.Mods
                 }
             }
         }
+
 
 
         public static void CantMoveFingers()
