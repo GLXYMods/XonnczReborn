@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using GorillaLocomotion;
@@ -9,41 +9,53 @@ using UnityEngine.InputSystem;
 using Photon.Pun;
 using static StupidTemplate.Menu.Main;
 using StupidTemplate.Classes;
+using static StupidTemplate.Mods.Movement;
+using StupidTemplate.Patches;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace StupidTemplate.Mods
 {
     public class Infection
     {
-        public static void TagAll()
+
+        public static void antitag()
         {
-            foreach (Photon.Realtime.Player player in PhotonNetwork.PlayerListOthers)
+            GhostPatch.Prefix(GorillaTagger.Instance.offlineVRRig);
+            GhostPatch2.Prefix(VRRigJobManager.Instance, GorillaTagger.Instance.offlineVRRig);
+            float num;
+            VRRig vrrig2 = null;
+            foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
             {
-                if (ControllerInputPoller.instance.rightControllerIndexFloat > 0.1f || Mouse.current.rightButton.isPressed)
+                if (!vrrig.isOfflineVRRig && !vrrig.isMyPlayer)
                 {
-                    VRRig vrrig = GorillaGameManager.instance.FindPlayerVRRig(player);
-                    if (!vrrig.mainSkin.material.name.Contains("fected") && GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected"))
+                    if (vrrig.mainSkin.material.name.Contains("fected") || vrrig.mainSkin.material.name.Contains("it") || !GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected"))
                     {
-                        GorillaTagger.Instance.offlineVRRig.enabled = false;
-                        GorillaTagger.Instance.offlineVRRig.transform.position = vrrig.transform.position;
-                        GorillaTagger.Instance.myVRRig.transform.position = vrrig.transform.position;
+                        if (Vector3.Distance(GorillaTagger.Instance.bodyCollider.transform.position, vrrig.transform.position) < 5)
+                        {
+                            num = Vector3.Distance(GorillaTagger.Instance.bodyCollider.transform.position, vrrig.transform.position);
+                            vrrig2 = vrrig;
+                            GorillaTagger.Instance.offlineVRRig.headBodyOffset.x = -100;
+                        }
+                        else
+                        {
+                            GorillaTagger.Instance.offlineVRRig.headBodyOffset.x = -0;
+                        }
                     }
-                }
-                else
-                {
-                    GorillaTagger.Instance.offlineVRRig.enabled = true;
-                    GetIndex("Tag All").enabled = false;
                 }
             }
         }
 
+
+
         public static void TagSelf()
         {
-            foreach (Photon.Realtime.Player player in PhotonNetwork.PlayerListOthers)
+            GhostPatch.Prefix(GorillaTagger.Instance.offlineVRRig);
+            GhostPatch2.Prefix(VRRigJobManager.Instance, GorillaTagger.Instance.offlineVRRig);
+            foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
             {
-                if (ControllerInputPoller.instance.rightControllerIndexFloat > 0.1f || Mouse.current.rightButton.isPressed)
+                if (ControllerInputPoller.instance.rightControllerIndexFloat > 0.5f || Mouse.current.rightButton.isPressed)
                 {
-                    VRRig vrrig = GorillaGameManager.instance.FindPlayerVRRig(player);
-                    if (!vrrig.mainSkin.material.name.Contains("fected") && GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected"))
+                    if (vrrig.mainSkin.material.name.Contains("fected") && !GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected"))
                     {
                         GorillaTagger.Instance.offlineVRRig.enabled = false;
                         GorillaTagger.Instance.offlineVRRig.transform.position = vrrig.rightHandTransform.transform.position;
@@ -53,18 +65,47 @@ namespace StupidTemplate.Mods
                 else
                 {
                     GorillaTagger.Instance.offlineVRRig.enabled = true;
-                    GetIndex("Tag All").enabled = false;
                 }
             }
         }
 
-        static GameObject point = null;
+        public static void TagAll()
+        {
+            GhostPatch.Prefix(GorillaTagger.Instance.offlineVRRig);
+            GhostPatch2.Prefix(VRRigJobManager.Instance, GorillaTagger.Instance.offlineVRRig);
+            if (InputLib.RT() || Mouse.current.rightButton.isPressed)
+            {
+                {
+                    foreach (var rig in GorillaParent.instance.vrrigs)
+                    {
+                        if (!GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected") && !GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("it") && !GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("ice")) break;
+                        if ((!rig.mainSkin.material.name.Contains("ice") && GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("ice")) || (!rig.mainSkin.material.name.Contains("it") && GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("it")) || (!rig.mainSkin.material.name.Contains("fected") && GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected")))
+                        {
+                            var ins = GorillaTagger.Instance.offlineVRRig;
+                            ins.enabled = false;
+                            ins.transform.position = rig.transform.position + Vector3.up;
+                            ins.rightHand.rigTarget.transform.position = rig.transform.position;
+                            ins.leftHand.rigTarget.transform.position = rig.transform.position;
+                            GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position = rig.transform.position;
+                            ins.enabled = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        public static VRRig lockon;
+        public static VRRig rigg;
+
+        static GameObject point;
 
         public static void TagGun()
         {
+            GhostPatch.Prefix(GorillaTagger.Instance.offlineVRRig);
+            GhostPatch2.Prefix(VRRigJobManager.Instance, GorillaTagger.Instance.offlineVRRig);
             if (ControllerInputPoller.instance.rightGrab)
             {
-                Physics.Raycast(GorillaLocomotion.Player.Instance.rightControllerTransform.position, -GorillaLocomotion.Player.Instance.rightControllerTransform.up, out var hitInfo);
+                Physics.Raycast(GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position, -GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.up, out var hitInfo);
                 point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 point.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
                 point.GetComponent<Renderer>().material.shader = Shader.Find("GorillaTag/UberShader");
@@ -72,50 +113,77 @@ namespace StupidTemplate.Mods
                 point.transform.position = hitInfo.point;
                 GameObject line2 = new GameObject("Line");
                 LineRenderer lineRenderer2 = line2.AddComponent<LineRenderer>();
-                var color2 = MenuColor;
                 lineRenderer2.startColor = Color.red;
                 lineRenderer2.endColor = Color.red;
-                lineRenderer2.startWidth = 0.05f;
-                lineRenderer2.endWidth = 0.05f;
+                lineRenderer2.startWidth = 0.01f;
+                lineRenderer2.endWidth = 0.01f;
                 lineRenderer2.positionCount = 2;
                 lineRenderer2.useWorldSpace = true;
-                lineRenderer2.SetPosition(0, GorillaLocomotion.Player.Instance.rightControllerTransform.position);
+                lineRenderer2.SetPosition(0, GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position);
                 lineRenderer2.SetPosition(1, point.transform.position);
                 lineRenderer2.material.shader = Shader.Find("GUI/Text Shader");
-                Rigidbody comp = line2.GetComponent(typeof(Rigidbody)) as Rigidbody;
-                comp.velocity = GorillaLocomotion.Player.Instance.rightHandCenterVelocityTracker.GetAverageVelocity(true, 0);
-                UnityEngine.Object.Destroy(lineRenderer2, 1f);
-                UnityEngine.Object.Destroy(line2, 1f);
+                UnityEngine.Object.Destroy(lineRenderer2, Time.deltaTime);
+                UnityEngine.Object.Destroy(line2, Time.deltaTime);
+                UnityEngine.Object.Destroy(point, Time.deltaTime);
                 GameObject.Destroy(point.GetComponent<BoxCollider>());
                 GameObject.Destroy(point.GetComponent<Rigidbody>());
                 GameObject.Destroy(point.GetComponent<Collider>());
                 if (ControllerInputPoller.instance.rightControllerIndexFloat >= 0.3f)
                 {
-                    lineRenderer2.startColor = Color.green;
-                    lineRenderer2.endColor = Color.green;
-                    point.GetComponent<Renderer>().material.color = Color.green;
-                    GorillaTagger.Instance.offlineVRRig.enabled = false;
-                    GorillaTagger.Instance.offlineVRRig.transform.position = point.transform.position;
+                    Collider collider2 = hitInfo.collider;
+                    Troll.rigg = ((collider2 != null) ? collider2.GetComponentInParent<VRRig>() : null);
+                    if (Troll.lockon == null)
+                    {
+                        Troll.lockon = Troll.rigg;
+                    }
+                    else
+                    {
+                        lineRenderer2.startColor = Color.blue;
+                        lineRenderer2.endColor = Color.blue;
+                        point.GetComponent<Renderer>().material.shader = Shader.Find("GUI/Text Shader");
+                        point.GetComponent<Renderer>().material.color = Color.blue;
+                        point.transform.position = Troll.lockon.transform.position;
+                        lineRenderer2.SetPosition(0, GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position);
+                        lineRenderer2.SetPosition(1, Troll.lockon.transform.position);
+                        var ins = GorillaTagger.Instance.offlineVRRig;
+                        ins.enabled = false;
+                        ins.transform.position = Troll.lockon.transform.position + Vector3.up;
+                        ins.rightHand.rigTarget.transform.position = Troll.lockon.transform.position;
+                        ins.leftHand.rigTarget.transform.position = Troll.lockon.transform.position;
+                        GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position = Troll.lockon.transform.position;
+                    }
+
                 }
                 else
                 {
-                    GorillaTagger.Instance.offlineVRRig.enabled = true;
+                    lockon = null;
                 }
+            }
+            else
+            {
+                lockon = null;
+                GorillaTagger.Instance.offlineVRRig.enabled = true;
             }
             if (point != null)
             {
                 GameObject.Destroy(point, Time.deltaTime);
-            }
+            }            
+        }
+
+        public static void PcTagGun()
+        {
+            GhostPatch.Prefix(GorillaTagger.Instance.offlineVRRig);
+            GhostPatch2.Prefix(VRRigJobManager.Instance, GorillaTagger.Instance.offlineVRRig);
             if (Mouse.current.rightButton.isPressed)
             {
                 RaycastHit raycastHit;
-                Ray ray = Camera.main.ScreenPointToRay(UnityInput.Current.mousePosition);
+                Ray ray = GameObject.Find("Shoulder Camera").activeSelf ? GameObject.Find("Shoulder Camera").GetComponent<Camera>().ScreenPointToRay(UnityInput.Current.mousePosition) : GorillaTagger.Instance.mainCamera.GetComponent<Camera>().ScreenPointToRay(UnityInput.Current.mousePosition);
                 if (Physics.Raycast(ray, out raycastHit) && point == null)
                 {
                     point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                     UnityEngine.Object.Destroy(point.GetComponent<Rigidbody>());
                     UnityEngine.Object.Destroy(point.GetComponent<SphereCollider>());
-                    point.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+                    point.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
                     point.GetComponent<Renderer>().material.color = Color.red;
                     ColorChanger colorChanger22 = point.AddComponent<ColorChanger>();
                     colorChanger22.Start();
@@ -126,37 +194,64 @@ namespace StupidTemplate.Mods
                 LineRenderer lineRenderer = line.AddComponent<LineRenderer>();
                 lineRenderer.startColor = Color.red;
                 lineRenderer.endColor = Color.red;
-                lineRenderer.startWidth = 0.05f;
-                lineRenderer.endWidth = 0.05f;
+                lineRenderer.startWidth = 0.01f;
+                lineRenderer.endWidth = 0.01f;
                 lineRenderer.positionCount = 2;
                 lineRenderer.useWorldSpace = true;
-                lineRenderer.SetPosition(0, GorillaLocomotion.Player.Instance.headCollider.transform.position);
+                lineRenderer.SetPosition(0, GorillaLocomotion.GTPlayer.Instance.headCollider.transform.position);
                 lineRenderer.SetPosition(1, point.transform.position);
                 lineRenderer.material.shader = Shader.Find("GUI/Text Shader");
                 UnityEngine.Object.Destroy(lineRenderer, Time.deltaTime);
                 UnityEngine.Object.Destroy(line, Time.deltaTime);
-                if (UnityInput.Current.GetMouseButton(0))
+                bool mouseButton = UnityInput.Current.GetMouseButton(0);
+                if (mouseButton)
                 {
-                    lineRenderer.startColor = Color.green;
-                    lineRenderer.endColor = Color.green;
-                    point.GetComponent<Renderer>().material.color = Color.green;
-                    GorillaTagger.Instance.offlineVRRig.enabled = false;
-                    GorillaTagger.Instance.offlineVRRig.transform.position = point.transform.position;
-                    GorillaTagger.Instance.myVRRig.transform.position = point.transform.position;
+                    Collider collider2 = raycastHit.collider;
+                    Troll.rigg = ((collider2 != null) ? collider2.GetComponentInParent<VRRig>() : null);
+                    if (Troll.lockon == null)
+                    {
+                        Troll.lockon = Troll.rigg;
+                    }
+                    else
+                    {
+                        lineRenderer.startColor = Color.blue;
+                        lineRenderer.endColor = Color.blue;
+                        point.GetComponent<Renderer>().material.shader = Shader.Find("GUI/Text Shader");
+                        point.GetComponent<Renderer>().material.color = Color.blue;
+                        point.transform.position = Troll.lockon.transform.position;
+                        lineRenderer.SetPosition(0, GorillaLocomotion.GTPlayer.Instance.headCollider.transform.position);
+                        lineRenderer.SetPosition(1, Troll.lockon.transform.position);
+                        var ins = GorillaTagger.Instance.offlineVRRig;
+                        ins.enabled = false;
+                        ins.transform.position = Troll.lockon.transform.position + Vector3.up;
+                        ins.rightHand.rigTarget.transform.position = Troll.lockon.transform.position;
+                        ins.leftHand.rigTarget.transform.position = Troll.lockon.transform.position;
+                        GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position = Troll.lockon.transform.position;
+                    }
                 }
                 else
                 {
-                    GorillaTagger.Instance.offlineVRRig.enabled = true;
+                    Troll.lockon = null;
+                    Troll.enablerig();
                 }
             }
-
+            else
+            {
+                Troll.lockon = null;
+            }
+            if (point != null)
+            {
+                GameObject.Destroy(point, Time.deltaTime);
+            }
         }
 
         public static void FlickTagGun()
         {
+            GhostPatch.Prefix(GorillaTagger.Instance.offlineVRRig);
+            GhostPatch2.Prefix(VRRigJobManager.Instance, GorillaTagger.Instance.offlineVRRig);
             if (ControllerInputPoller.instance.rightGrab)
             {
-                Physics.Raycast(GorillaLocomotion.Player.Instance.rightControllerTransform.position, -GorillaLocomotion.Player.Instance.rightControllerTransform.up, out var hitInfo);
+                Physics.Raycast(GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position, -GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.up, out var hitInfo);
                 point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 point.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
                 point.GetComponent<Renderer>().material.shader = Shader.Find("GorillaTag/UberShader");
@@ -164,34 +259,27 @@ namespace StupidTemplate.Mods
                 point.transform.position = hitInfo.point;
                 GameObject line2 = new GameObject("Line");
                 LineRenderer lineRenderer2 = line2.AddComponent<LineRenderer>();
-                var color2 = MenuColor;
                 lineRenderer2.startColor = Color.red;
                 lineRenderer2.endColor = Color.red;
-                lineRenderer2.startWidth = 0.05f;
-                lineRenderer2.endWidth = 0.05f;
+                lineRenderer2.startWidth = 0.01f;
+                lineRenderer2.endWidth = 0.01f;
                 lineRenderer2.positionCount = 2;
                 lineRenderer2.useWorldSpace = true;
-                lineRenderer2.SetPosition(0, GorillaLocomotion.Player.Instance.rightControllerTransform.position);
+                lineRenderer2.SetPosition(0, GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position);
                 lineRenderer2.SetPosition(1, point.transform.position);
                 lineRenderer2.material.shader = Shader.Find("GUI/Text Shader");
-                Rigidbody comp = line2.GetComponent(typeof(Rigidbody)) as Rigidbody;
-                comp.velocity = GorillaLocomotion.Player.Instance.rightHandCenterVelocityTracker.GetAverageVelocity(true, 0);
-                UnityEngine.Object.Destroy(lineRenderer2, 1f);
-                UnityEngine.Object.Destroy(line2, 1f);
+                UnityEngine.Object.Destroy(lineRenderer2, Time.deltaTime);
+                UnityEngine.Object.Destroy(line2, Time.deltaTime);
+                UnityEngine.Object.Destroy(point, Time.deltaTime);
                 GameObject.Destroy(point.GetComponent<BoxCollider>());
                 GameObject.Destroy(point.GetComponent<Rigidbody>());
                 GameObject.Destroy(point.GetComponent<Collider>());
                 if (ControllerInputPoller.instance.rightControllerIndexFloat >= 0.3f)
                 {
-                    lineRenderer2.startColor = Color.green;
-                    lineRenderer2.endColor = Color.green;
-                    point.GetComponent<Renderer>().material.color = Color.green;
-                    GorillaLocomotion.Player.Instance.rightControllerTransform.position = point.transform.position;
-                    GorillaTagger.Instance.offlineVRRig.rightHandTransform.position = point.transform.position;
-                }
-                else
-                {
-                    GorillaTagger.Instance.offlineVRRig.enabled = true;
+                    lineRenderer2.startColor = Color.blue;
+                    lineRenderer2.endColor = Color.blue;
+                    point.GetComponent<Renderer>().material.color = Color.blue;
+                    Player.Instance.rightControllerTransform.position = point.transform.position;
                 }
             }
             if (point != null)
@@ -201,13 +289,13 @@ namespace StupidTemplate.Mods
             if (Mouse.current.rightButton.isPressed)
             {
                 RaycastHit raycastHit;
-                Ray ray = Camera.main.ScreenPointToRay(UnityInput.Current.mousePosition);
+                Ray ray = GameObject.Find("Shoulder Camera").activeSelf ? GameObject.Find("Shoulder Camera").GetComponent<Camera>().ScreenPointToRay(UnityInput.Current.mousePosition) : GorillaTagger.Instance.mainCamera.GetComponent<Camera>().ScreenPointToRay(UnityInput.Current.mousePosition);
                 if (Physics.Raycast(ray, out raycastHit) && point == null)
                 {
                     point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                     UnityEngine.Object.Destroy(point.GetComponent<Rigidbody>());
                     UnityEngine.Object.Destroy(point.GetComponent<SphereCollider>());
-                    point.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+                    point.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
                     point.GetComponent<Renderer>().material.color = Color.red;
                     ColorChanger colorChanger22 = point.AddComponent<ColorChanger>();
                     colorChanger22.Start();
@@ -218,46 +306,72 @@ namespace StupidTemplate.Mods
                 LineRenderer lineRenderer = line.AddComponent<LineRenderer>();
                 lineRenderer.startColor = Color.red;
                 lineRenderer.endColor = Color.red;
-                lineRenderer.startWidth = 0.05f;
-                lineRenderer.endWidth = 0.05f;
+                lineRenderer.startWidth = 0.01f;
+                lineRenderer.endWidth = 0.01f;
                 lineRenderer.positionCount = 2;
                 lineRenderer.useWorldSpace = true;
-                lineRenderer.SetPosition(0, GorillaLocomotion.Player.Instance.headCollider.transform.position);
+                lineRenderer.SetPosition(0, GorillaLocomotion.GTPlayer.Instance.headCollider.transform.position);
                 lineRenderer.SetPosition(1, point.transform.position);
                 lineRenderer.material.shader = Shader.Find("GUI/Text Shader");
                 UnityEngine.Object.Destroy(lineRenderer, Time.deltaTime);
                 UnityEngine.Object.Destroy(line, Time.deltaTime);
                 if (UnityInput.Current.GetMouseButton(0))
                 {
-                    lineRenderer.startColor = Color.green;
-                    lineRenderer.endColor = Color.green;
-                    point.GetComponent<Renderer>().material.color = Color.green;
-                    GorillaLocomotion.Player.Instance.rightControllerTransform.position = point.transform.position;
-                    GorillaTagger.Instance.offlineVRRig.rightHandTransform.position = point.transform.position;
+                    
                 }
                 else
                 {
-                    GorillaTagger.Instance.offlineVRRig.enabled = true;
+                    Troll.lockon = null;
+                    Troll.enablerig();
                 }
             }
-
+            else
+            {
+                Troll.lockon = null;
+            }
+            if (point != null)
+            {
+                GameObject.Destroy(point, Time.deltaTime);
+            }
         }
 
         public static void TagAura()
         {
+            GhostPatch.Prefix(GorillaTagger.Instance.offlineVRRig);
+            GhostPatch2.Prefix(VRRigJobManager.Instance, GorillaTagger.Instance.offlineVRRig);
+            float fl;
+            VRRig rig = null;
             foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
             {
-                if (GorillaTagger.Instance.offlineVRRig.mainSkin.material.name.Contains("fected") || PhotonNetwork.InRoom == true)
+                if (!vrrig.isOfflineVRRig && !vrrig.isMyPlayer)
                 {
-                    GorillaLocomotion.Player.Instance.rightControllerTransform.position = RigManager.GetClosestVRRig().transform.position;
-                    GorillaLocomotion.Player.Instance.leftControllerTransform.position = RigManager.GetClosestVRRig().transform.position;
-                }
-                else
-                {
-                    Notifications.NotifiLib.SendNotification("<color=red>{ERROR}</color>, <color=blue>You Either are not tagged or not in a room</color>");
+                    if (!vrrig.mainSkin.material.name.Contains("fected"))
+                    {
+                        var distance = 7;
+                        var vrrigBody = vrrig.transform.position;
+                        var bdyc = GorillaTagger.Instance.bodyCollider.transform.position;
+                        var bdy = Vector3.Distance(vrrigBody, bdyc);
+                        if (bdy <= distance)
+                        {
+                            rig = vrrig;
+                            var ins = GorillaTagger.Instance.offlineVRRig;
+                            ins.enabled = false;
+                            ins.transform.position = vrrigBody + Vector3.up;
+                            ins.rightHand.rigTarget.transform.position = vrrigBody;
+                            ins.leftHand.rigTarget.transform.position = vrrigBody;
+                            Player.Instance.rightControllerTransform.position = vrrigBody;
+                        }
+                        else
+                        {
+                            var ins = GorillaTagger.Instance.offlineVRRig;
+                            ins.enabled = true;
+                        }
+                    }                  
                 }
             }
         }
+
+
 
 
     }
