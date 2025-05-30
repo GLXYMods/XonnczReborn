@@ -15,6 +15,7 @@ using GorillaNetworking;
 using StupidTemplate.Notifications;
 using System.IO;
 using StupidTemplate.Menu;
+using Player = GorillaLocomotion.GTPlayer;
 using HarmonyLib;
 using static StupidTemplate.Settings;
 
@@ -22,6 +23,26 @@ namespace StupidTemplate.Mods
 {
     public class Visual
     {
+
+        public static bool Grabbed = false;
+        public static void StumpText() // creds to glxy
+        {
+            GameObject StumpObj = new GameObject("STUMPOBJ");
+            TextMeshPro textobj = StumpObj.AddComponent<TextMeshPro>();
+            textobj.text = "<color=yellow>Menu Status:</color> <color=green>Undetected</color>\n<color=purple>discord.gg/xonncz</color>";
+            textobj.fontSize = 2f;
+            textobj.alignment = TextAlignmentOptions.Center;
+            textobj.font = GameObject.Find("motdtext").GetComponent<TextMeshPro>().font;
+            Object.Destroy(StumpObj, Time.deltaTime);
+            Transform shit = StumpObj.transform;
+            shit.GetComponent<TextMeshPro>().renderer.material.shader = Shader.Find("GUI/Text Shader");
+            shit.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
+            shit.position = new Vector3(-63.5511f, 12.2094f, -82.6264f);
+            shit.LookAt(Camera.main.transform.position);
+            shit.Rotate(0f, 180f, 0f);         
+        }
+
+
 
 
         public static void BoxEsp()
@@ -42,7 +63,6 @@ namespace StupidTemplate.Mods
             }
         }
 
-        public static TMP_FontAsset gtagfont = GameObject.Find("motdtext").GetComponent<TextMeshPro>().font;
 
         public static void NameTags()
         {
@@ -57,7 +77,7 @@ namespace StupidTemplate.Mods
                     textMeshPro.fontSize = 2f;
                     textMeshPro.alignment = TextAlignmentOptions.Center;
                     textMeshPro.color = Color.red;
-                    textMeshPro.font = gtagfont;
+                    textMeshPro.font = GameObject.Find("motdtext").GetComponent<TextMeshPro>().font;
                     NameTags.transform.SetParent(vrigs.transform);
                     Object.Destroy(NameTags, Time.deltaTime);
                     Transform Nametag = NameTags.transform;
@@ -75,39 +95,74 @@ namespace StupidTemplate.Mods
         public static GameObject motdTextB = null;
         public static GameObject Tos = null;
         public static float fl;
+
+
+
+        static GameObject MonkeyPlush;
+
+        public static void GrabMonkePlush()
+        {
+            if (ControllerInputPoller.instance.rightGrab)
+            {
+                MonkeyPlush = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/MonkePlushyDisplay");
+                MonkeyPlush.SetActive(true);
+                MonkeyPlush.transform.position = Player.Instance.rightControllerTransform.position;
+            }
+            else
+            {
+                MonkeyPlush = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/MonkePlushyDisplay");
+                MonkeyPlush.SetActive(false);
+            }
+        }
+        public static void MonkePlush()
+        {
+            MonkeyPlush = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/MonkePlushyDisplay");
+            MonkeyPlush.SetActive(true);
+            MonkeyPlush.transform.position = new Vector3(-67.2123f, 11.0994f, -82.0913f);
+        }
+        public static void MonkePlushOff()
+        {
+            MonkeyPlush = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/MonkePlushyDisplay");
+            MonkeyPlush.SetActive(false);
+        }
         public static void boards()
         {
+            Material mat = null;
             float h = (Time.frameCount / 180f) % 1f;
             motdText = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/motd (1)");
             motdText.GetComponent<TextMeshPro>().text = string.Format("X O N N C Z | R E B O R N");
             motdText.GetComponent<TextMeshPro>().color = Color.Lerp(MenuColor, Color.black, Mathf.PingPong(Time.time, 1f));
 
             motdTextB = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/motdtext");
-            motdTextB.GetComponent<TextMeshPro>().text = "Thank you for using X O N N C Z Reborn!\nThe Menu Status is : UND\nWe really hope that you have fun while using this menu, and don't forget DO NOT GET BANNED, AND IF YOU DO IT IS NOT OUR FAULT!\n"+ DateTime.Now.ToString("hh:mm tt");
+            motdTextB.GetComponent<TextMeshPro>().text = string.Format("Thank you for using X O N N C Z Reborn!\nThe Menu Status is : UND\nWe really hope that you have fun while using this menu, and don't forget DO NOT GET BANNED, AND IF YOU DO IT IS NOT OUR FAULT!\n"+ DateTime.Now.ToString("hh:mm tt"));
             motdTextB.GetComponent<TextMeshPro>().color = Color.Lerp(MenuColor, Color.black, Mathf.PingPong(Time.time, 1f));
 
             coc = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/CodeOfConduct");
             coc.GetComponent<TextMeshPro>().text = string.Format("X O N N C Z | R E B O R N");
             coc.GetComponent<TextMeshPro>().color = Color.Lerp(MenuColor, Color.black, Mathf.PingPong(Time.time, 1f));
-            coc2 = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/COC Text");
-            
-            coc2.GetComponent<TextMeshPro>().text = "This Menu Has Been devopled for some time we do hope that you enjoy it and make sure that you do not get yourself banned! and if you do please report it in the discord so we can fix it. But it is not our fault if you get banned!\nThe Menu is : UNDETECTED";
+
+            coc2 = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/COC Text");            
+            coc2.GetComponent<TextMeshPro>().text = string.Format(("This Menu Has Been devopled for some time we do hope that you enjoy it and make sure that you do not get yourself banned! and if you do please report it in the discord so we can fix it. But it is not our fault if you get banned!\nThe Menu is : UNDETECTED"));
             coc2.GetComponent<TextMeshPro>().color = Color.Lerp(MenuColor, Color.black, Mathf.PingPong(Time.time, 1f));
 
             GameObject df = GameObject.Find("Environment Objects/LocalObjects_Prefab/Forest");
             df.SetActive(true);
 
+
+
             
-
-
+            mat = new Material(Shader.Find("GorillaTag/UberShader"));
+            mat.color = Color.blue;
             Computer = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/TreeRoomInteractables/GorillaComputerObject/ComputerUI/monitor/monitorScreen");
-            Computer.SetActive(false);
+            Computer.GetComponent<Renderer>().material = mat;
 
+            mat = new Material(Shader.Find("GorillaTag/UberShader"));
+            mat.color = Color.blue;
             GameObject WallMonitor = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/TreeRoomBoundaryStones/BoundaryStoneSet_Forest/wallmonitorforestbg");
-            WallMonitor.SetActive(false);
+            WallMonitor.GetComponent<Renderer>().material = mat;
 
             KeyBoard = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/TreeRoomInteractables/GorillaComputerObject/ComputerUI/keyboard (1)");
-            KeyBoard.GetComponent<Renderer>().material.color = Color.black;
+            KeyBoard.GetComponent<Renderer>().material = mat;
 
             GameObject K1 = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/TreeRoomInteractables/GorillaComputerObject/ComputerUI/keyboard (1)/Buttons/Keys/a");
             K1.GetComponent<Renderer>().material.color = Color.Lerp(MenuColor, Color.black, Mathf.PingPong(Time.time, 1f));
@@ -290,7 +345,7 @@ namespace StupidTemplate.Mods
                     lineRenderer.endWidth = 0.01f;
                     lineRenderer.positionCount = 2;
                     lineRenderer.useWorldSpace = true;
-                    lineRenderer.SetPosition(0, GorillaLocomotion.Player.Instance.rightControllerTransform.position);
+                    lineRenderer.SetPosition(0, GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position);
                     lineRenderer.SetPosition(1, rig.transform.position);
                     lineRenderer.material.shader = Shader.Find("GUI/Text Shader");
                     Object.Destroy(lineRenderer, Time.deltaTime);
@@ -306,7 +361,7 @@ namespace StupidTemplate.Mods
                 {
                     GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                     sphere.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-                    sphere.transform.localPosition = rig.transform.position + new Vector3(0f, 1f, 0f);
+                    sphere.transform.localPosition = rig.transform.position + Vector3.up;
                     sphere.GetComponent<SphereCollider>().enabled = false;
                     sphere.GetComponent<Renderer>().material.shader = Shader.Find("GUI/Text Shader");
                     sphere.GetComponent<Renderer>().material.color = MenuColor;
@@ -320,7 +375,7 @@ namespace StupidTemplate.Mods
                     lineRenderer.endWidth = 0.01f;
                     lineRenderer.positionCount = 2;
                     lineRenderer.useWorldSpace = true;
-                    lineRenderer.SetPosition(0, GorillaLocomotion.Player.Instance.rightControllerTransform.position);
+                    lineRenderer.SetPosition(0, GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position);
                     lineRenderer.SetPosition(1, sphere.transform.position);
                     lineRenderer.material.shader = Shader.Find("GUI/Text Shader");
                     Object.Destroy(lineRenderer, Time.deltaTime);
@@ -351,7 +406,7 @@ namespace StupidTemplate.Mods
         public static void ChangeMenuTheme()
         {
             t++;
-            if (t > 11)
+            if (t > 16)
             {
                 t = 0;
             }
@@ -359,7 +414,7 @@ namespace StupidTemplate.Mods
             if (t == 0)
             {
                 MenuColor = Color.red;
-                OutlineColor = Color.black;
+                OutlineColor = new Color32(136, 8, 8, 255);
                 GetIndex("Change Theme").overlapText = "Theme : Red";
             }
             if (t == 1)
@@ -371,19 +426,19 @@ namespace StupidTemplate.Mods
             if (t == 2)
             {
                 MenuColor = Color.black;
-                OutlineColor = Color.black;
+                OutlineColor = new Color32(64, 71, 72, 255);
                 GetIndex("Change Theme").overlapText = "Theme : Black";
             }
             if (t == 3)
             {
                 MenuColor = Color.grey;
-                OutlineColor = Color.black;
+                OutlineColor = new Color32(64, 71, 72, 255);
                 GetIndex("Change Theme").overlapText = "Theme : Grey";
             }
             if (t == 4)
             {
                 MenuColor = Color.green;
-                OutlineColor = Color.black;
+                OutlineColor = new Color32(0, 255, 139, 255);
                 GetIndex("Change Theme").overlapText = "Theme : Green";
             }
             if (t == 5)
@@ -401,31 +456,31 @@ namespace StupidTemplate.Mods
             if (t == 7)
             {
                 MenuColor = new Color32(255, 255, 143, 255);
-                OutlineColor = new Color32(0, 0, 0, 255);
+                OutlineColor = new Color32(218, 255, 0, 255);
                 GetIndex("Change Theme").overlapText = "Theme : Yellow";
             }
             if (t == 8)
             {
                 MenuColor = new Color32(0, 158, 255, 255);
-                OutlineColor = new Color32(0, 0, 0, 255);
+                OutlineColor = new Color32(0, 180, 255, 255);
                 GetIndex("Change Theme").overlapText = "Theme : Light Blue";
             }
             if (t == 9)
             {
                 MenuColor = new Color32(255, 135, 0, 255);
-                OutlineColor = new Color32(0, 0, 0, 255);
+                OutlineColor = new Color32(255, 100, 0, 255);
                 GetIndex("Change Theme").overlapText = "Theme : Orange";
             }
             if (t == 10)
             {
-                MenuColor = new Color32(120, 255, 0, 255);
-                OutlineColor = new Color32(0, 0, 0, 255);
+                MenuColor = new Color32(108, 255, 0, 255);
+                OutlineColor = new Color32(0, 100, 0, 255);
                 GetIndex("Change Theme").overlapText = "Theme : Lime";
             }
             if (t == 11)
             {
                 MenuColor = new Color32(0, 248, 255, 255);
-                OutlineColor = new Color32(0, 0, 0, 255);
+                OutlineColor = new Color32(0, 214, 227, 255);
                 GetIndex("Change Theme").overlapText = "Theme : Aqua";
             }
             if (t == 12)
@@ -436,6 +491,30 @@ namespace StupidTemplate.Mods
             else
             {
                 ClearMenu = false;
+            }
+            if (t == 13)
+            {
+                MenuColor = new Color32(0, 0, 0, 255);
+                OutlineColor = new Color32(0, 0, 255, 255);
+                GetIndex("Change Theme").overlapText = "Theme : Dragon's Fav";
+            }
+            if (t == 14)
+            {
+                MenuColor = new Color32(0, 0, 0, 255);
+                OutlineColor = new Color32(90, 0, 124, 255);
+                GetIndex("Change Theme").overlapText = "Theme : Dragon's Fav 2";
+            }
+            if (t == 15)
+            {
+                MenuColor = new Color32(0, 0, 0, 255);
+                OutlineColor = new Color32(255, 0, 0, 255);
+                GetIndex("Change Theme").overlapText = "Theme : Glxy's Fav";
+            }
+            if (t == 16)
+            {
+                MenuColor = new Color32(0, 0, 0, 255);
+                OutlineColor = new Color32(150, 78, 255, 255);
+                GetIndex("Change Theme").overlapText = "Theme : Doritoz Fav";
             }
         }
 
@@ -458,20 +537,20 @@ namespace StupidTemplate.Mods
         {
             foreach (VRRig rigs in GorillaParent.instance.vrrigs)
             {
-                if (rigs.mainSkin.material.name.Contains("fected"))
+                if (!rigs.isLocal || !rigs.isMyPlayer)
                 {
-                    rigs.mainSkin.material.shader = Shader.Find("GUI/Text Shader");
-                    rigs.mainSkin.material.color = new Color32(255, 0, 0, 255);
-                    GorillaTagger.Instance.offlineVRRig.mainSkin.material.shader = Shader.Find("GorillaTag/UberShader");
-                    GorillaTagger.Instance.offlineVRRig.mainSkin.material.color = GorillaTagger.Instance.offlineVRRig.playerColor;
-                }
-                else
-                {
-                    rigs.mainSkin.material.shader = Shader.Find("GUI/Text Shader");
-                    rigs.mainSkin.material.color = new Color32(0, 255, 0, 255);
-                    GorillaTagger.Instance.offlineVRRig.mainSkin.material.shader = Shader.Find("GorillaTag/UberShader");
-                    GorillaTagger.Instance.offlineVRRig.mainSkin.material.color = GorillaTagger.Instance.offlineVRRig.playerColor;
-                }
+                    if (rigs.mainSkin.material.name.Contains("fected"))
+                    {
+                        rigs.mainSkin.material.shader = Shader.Find("GUI/Text Shader");
+                        rigs.mainSkin.material.color = new Color32(255, 0, 0, 255);
+                        GorillaTagger.Instance.offlineVRRig.mainSkin.material.shader = Shader.Find("GorillaTag/UberShader");
+                    }
+                    else
+                    {
+                        rigs.mainSkin.material.shader = Shader.Find("GorillaTag/UberShader");
+                        rigs.mainSkin.material.color = new Color32(0, 255, 0, 255);
+                    }
+                }               
             }
         }
         public static void Chams2()
@@ -482,6 +561,7 @@ namespace StupidTemplate.Mods
                 {
                     rigs.mainSkin.material.shader = Shader.Find("GUI/Text Shader");
                     rigs.mainSkin.material.color = Color.Lerp(MenuColor, Color.black, Mathf.PingPong(Time.time, 1f));
+                    GorillaTagger.Instance.offlineVRRig.mainSkin.material.shader = Shader.Find("GorillaTag/UberShader");
                 }
             }
         }
@@ -494,8 +574,7 @@ namespace StupidTemplate.Mods
                     rigs.mainSkin.material.shader = Shader.Find("GorillaTag/UberShader");
                     rigs.mainSkin.material.color = rigs.playerColor;
                 }
-            }
-                 
+            }                
         }
 
 
