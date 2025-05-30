@@ -14,17 +14,12 @@ using Photon.Pun;
 using System.Linq;
 using static StupidTemplate.Mods.InputLib;
 using Xonncz_Reborn.Mods;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace StupidTemplate.Mods
 {
-
-
     public class Movement
     {
-
-
-
-
         public static void JoystickFly()
         {
             if (ControllerInputPoller.instance.rightControllerPrimary2DAxis.y > 0.5f)
@@ -56,17 +51,23 @@ namespace StupidTemplate.Mods
                 Player.Instance.bodyCollider.attachedRigidbody.AddForce(Player.Instance.bodyCollider.transform.forward * (Time.deltaTime * (-15f / Time.deltaTime)), ForceMode.Acceleration);
             }
         }
-        private static bool Dash = false;
-        private static bool Dash1 = false;
+        private static bool dashed = false;
         private static bool dashing = false;
         private static float delay;
         public static void dash()
         {
             bool rp = ControllerInputPoller.instance.rightControllerPrimaryButton;
             bool rmb = Mouse.current.rightButton.wasPressedThisFrame;
-            if (rp || rmb)
+
+            if (rmb)
             {
                 Player.Instance.GetComponent<Rigidbody>().velocity = Player.Instance.headCollider.transform.forward * 9f;
+            }
+
+            if (rp && Time.time > delay + 1.3f)
+            {
+                delay = Time.time;
+                Notifications.NotifiLib.SendNotification("TESTING");
             }
         }
         public static void Speed()
@@ -105,7 +106,7 @@ namespace StupidTemplate.Mods
                     UnityEngine.Object.Destroy(checkpoint.GetComponent<SphereCollider>());
                     UnityEngine.Object.Destroy(checkpoint.GetComponent<Rigidbody>());
                 }
-                checkpoint.transform.position = GorillaLocomotion.Player.Instance.rightControllerTransform.position;
+                checkpoint.transform.position = GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position;
             }
             if (checkpoint != null)
             {
@@ -119,7 +120,7 @@ namespace StupidTemplate.Mods
                         {
                             meshcollider.enabled = !false;
                             Player.Instance.transform.position = checkpoint.transform.position;
-                            GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                            GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
                         }
                     }
 
@@ -146,37 +147,6 @@ namespace StupidTemplate.Mods
                 UnityEngine.Object.Destroy(checkpoint);
                 checkpoint = null;
             }
-        }
-
-        public static void DestroyObj(GameObject Gameobject, float time)
-        {
-            GameObject.Destroy(Gameobject, time);
-        }
-
-        public static void destroyexample()
-        {
-        }
-
-        
-
-        public static void CreateObj(PrimitiveType primitiveType, Vector3 scale, Vector3 position, bool colliders, float destroytime, Color color, bool inviz)
-        {
-            GameObject game = GameObject.CreatePrimitive(primitiveType);
-            game.transform.localScale = scale;
-            game.transform.position = position;
-            game.GetComponent<BoxCollider>().enabled = colliders;
-            game.GetComponent<SphereCollider>().enabled = colliders;
-            game.GetComponent<Collider>().enabled = colliders;
-            game.GetComponent<Collider2D>().enabled = colliders;
-            game.GetComponent<Renderer>().material.color = color;
-            game.GetComponent<Renderer>().enabled = inviz;
-            DestroyObj(game, destroytime);
-        }
-
-        public static void example() 
-        {
-                      // Creates A Cube.  The Scale Of The Object                The Position Of The Object       uses colliders  Destroys when turned off   Color      Invisable
-            CreateObj(PrimitiveType.Cube, new Vector3(0.1f, 0.1f, 0.1f), GorillaTagger.Instance.rightHandTransform.position, true, Time.deltaTime,          Color.red, false); 
         }
 
         
@@ -248,7 +218,7 @@ namespace StupidTemplate.Mods
         {
             if (ControllerInputPoller.instance.rightGrab)
             {
-                Physics.Raycast(GorillaLocomotion.Player.Instance.rightControllerTransform.position, -GorillaLocomotion.Player.Instance.rightControllerTransform.up, out var hitInfo);
+                Physics.Raycast(GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position, -GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.up, out var hitInfo);
                 point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 point.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
                 point.GetComponent<Renderer>().material.shader = Shader.Find("GorillaTag/UberShader");
@@ -262,7 +232,7 @@ namespace StupidTemplate.Mods
                 lineRenderer2.endWidth = 0.01f;
                 lineRenderer2.positionCount = 2;
                 lineRenderer2.useWorldSpace = true;
-                lineRenderer2.SetPosition(0, GorillaLocomotion.Player.Instance.rightControllerTransform.position);
+                lineRenderer2.SetPosition(0, GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.position);
                 lineRenderer2.SetPosition(1, point.transform.position);
                 lineRenderer2.material.shader = Shader.Find("GUI/Text Shader");
                 UnityEngine.Object.Destroy(lineRenderer2, Time.deltaTime);
@@ -276,7 +246,7 @@ namespace StupidTemplate.Mods
                     lineRenderer2.startColor = Color.blue;
                     lineRenderer2.endColor = Color.blue;
                     point.GetComponent<Renderer>().material.color = Color.blue;
-                    GorillaLocomotion.Player.Instance.transform.position = point.transform.position;
+                    GorillaLocomotion.GTPlayer.Instance.transform.position = point.transform.position;
                 }
             }
             if (point != null)
@@ -286,7 +256,7 @@ namespace StupidTemplate.Mods
             if (Mouse.current.rightButton.isPressed)
             {
                 RaycastHit raycastHit;
-                Ray ray = Camera.main.ScreenPointToRay(UnityInput.Current.mousePosition);
+                Ray ray = GameObject.Find("Shoulder Camera").activeSelf ? GameObject.Find("Shoulder Camera").GetComponent<Camera>().ScreenPointToRay(UnityInput.Current.mousePosition) : GorillaTagger.Instance.mainCamera.GetComponent<Camera>().ScreenPointToRay(UnityInput.Current.mousePosition);
                 if (Physics.Raycast(ray, out raycastHit) && point == null)
                 {
                     point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -307,7 +277,7 @@ namespace StupidTemplate.Mods
                 lineRenderer.endWidth = 0.01f;
                 lineRenderer.positionCount = 2;
                 lineRenderer.useWorldSpace = true;
-                lineRenderer.SetPosition(0, GorillaLocomotion.Player.Instance.headCollider.transform.position);
+                lineRenderer.SetPosition(0, GorillaLocomotion.GTPlayer.Instance.headCollider.transform.position);
                 lineRenderer.SetPosition(1, point.transform.position);
                 lineRenderer.material.shader = Shader.Find("GUI/Text Shader");
                 UnityEngine.Object.Destroy(lineRenderer, Time.deltaTime);
@@ -318,7 +288,7 @@ namespace StupidTemplate.Mods
                     lineRenderer.startColor = Color.blue;
                     lineRenderer.endColor = Color.blue;
                     point.GetComponent<Renderer>().material.color = Color.blue;
-                    GorillaLocomotion.Player.Instance.transform.position = point.transform.position;
+                    GorillaLocomotion.GTPlayer.Instance.transform.position = point.transform.position;
                 }
                 else
                 {
@@ -459,7 +429,7 @@ namespace StupidTemplate.Mods
                 if (platL != null)
                 {
                     Rigidbody comp = platL.AddComponent(typeof(Rigidbody)) as Rigidbody;
-                    comp.velocity = GorillaLocomotion.Player.Instance.leftHandCenterVelocityTracker.GetAverageVelocity(true, 0);
+                    comp.velocity = GorillaLocomotion.GTPlayer.Instance.leftHandCenterVelocityTracker.GetAverageVelocity(true, 0);
                     GameObject.Destroy(platL, 2f);
                     platL = null;
                 }
@@ -483,7 +453,7 @@ namespace StupidTemplate.Mods
                 if (platR != null)
                 {
                     Rigidbody comp = platR.AddComponent(typeof(Rigidbody)) as Rigidbody;
-                    comp.velocity = GorillaLocomotion.Player.Instance.rightHandCenterVelocityTracker.GetAverageVelocity(true, 0);
+                    comp.velocity = GorillaLocomotion.GTPlayer.Instance.rightHandCenterVelocityTracker.GetAverageVelocity(true, 0);
                     GameObject.Destroy(platR, 2f);
                     platR = null;
                 }
@@ -517,7 +487,7 @@ namespace StupidTemplate.Mods
                 if (platL != null && platL2 != null)
                 {
                     Rigidbody comp = platL.AddComponent(typeof(Rigidbody)) as Rigidbody;
-                    comp.velocity = GorillaLocomotion.Player.Instance.leftHandCenterVelocityTracker.GetAverageVelocity(true, 0);
+                    comp.velocity = GorillaLocomotion.GTPlayer.Instance.leftHandCenterVelocityTracker.GetAverageVelocity(true, 0);
                     GameObject.Destroy(platL, 2f);
                     GameObject.Destroy(platL2);
                     GameObject.Destroy(platL3);
@@ -554,7 +524,7 @@ namespace StupidTemplate.Mods
                 if (platR != null)
                 {
                     Rigidbody comp = platR.AddComponent(typeof(Rigidbody)) as Rigidbody;
-                    comp.velocity = GorillaLocomotion.Player.Instance.rightHandCenterVelocityTracker.GetAverageVelocity(true, 0);
+                    comp.velocity = GorillaLocomotion.GTPlayer.Instance.rightHandCenterVelocityTracker.GetAverageVelocity(true, 0);
                     GameObject.Destroy(platR, 2f);
                     GameObject.Destroy(platR2);
                     platR = null;
@@ -587,7 +557,7 @@ namespace StupidTemplate.Mods
                 if (platL != null)
                 {
                     Rigidbody comp = platL.AddComponent(typeof(Rigidbody)) as Rigidbody;
-                    comp.velocity = GorillaLocomotion.Player.Instance.leftHandCenterVelocityTracker.GetAverageVelocity(true, 0);
+                    comp.velocity = GorillaLocomotion.GTPlayer.Instance.leftHandCenterVelocityTracker.GetAverageVelocity(true, 0);
                     foreach (MeshCollider meshCollider in Resources.FindObjectsOfTypeAll<MeshCollider>())
                     {
                         meshCollider.enabled = true;
@@ -619,7 +589,7 @@ namespace StupidTemplate.Mods
                 if (platR != null)
                 {
                     Rigidbody comp = platR.AddComponent(typeof(Rigidbody)) as Rigidbody;
-                    comp.velocity = GorillaLocomotion.Player.Instance.rightHandCenterVelocityTracker.GetAverageVelocity(true, 0);
+                    comp.velocity = GorillaLocomotion.GTPlayer.Instance.rightHandCenterVelocityTracker.GetAverageVelocity(true, 0);
                     foreach (MeshCollider meshCollider in Resources.FindObjectsOfTypeAll<MeshCollider>())
                     {
                         meshCollider.enabled = true;
@@ -674,78 +644,78 @@ namespace StupidTemplate.Mods
         {
             if (ControllerInputPoller.instance.rightControllerPrimaryButton)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 20f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 20f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
             if (Mouse.current.rightButton.isPressed)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.headCollider.transform.forward * Time.deltaTime) * 20f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.headCollider.transform.forward * Time.deltaTime) * 20f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
         }
         public static void FastFly()
         {
             if (ControllerInputPoller.instance.rightControllerPrimaryButton)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 30f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 30f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
             if (Mouse.current.rightButton.isPressed)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.headCollider.transform.forward * Time.deltaTime) * 30f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.headCollider.transform.forward * Time.deltaTime) * 30f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
         }
         public static void SlowFly()
         {
             if (ControllerInputPoller.instance.rightControllerPrimaryButton)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 10f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 10f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
             if (Mouse.current.rightButton.isPressed)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.headCollider.transform.forward * Time.deltaTime) * 10f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.headCollider.transform.forward * Time.deltaTime) * 10f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
         }
         public static void TriggerFly()
         {
             if (ControllerInputPoller.instance.rightControllerIndexFloat > 0.1)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 20f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 20f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
             if (Mouse.current.rightButton.isPressed)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.headCollider.transform.forward * Time.deltaTime) * 20f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.headCollider.transform.forward * Time.deltaTime) * 20f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
         }
         public static void TriggerFastFly()
         {
             if (ControllerInputPoller.instance.rightControllerIndexFloat > 0.1)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 30f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 30f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
             if (Mouse.current.rightButton.isPressed)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.headCollider.transform.forward * Time.deltaTime) * 30f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.headCollider.transform.forward * Time.deltaTime) * 30f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
         }
         public static void TriggerSlowFly()
         {
             if (ControllerInputPoller.instance.rightControllerIndexFloat > 0.1)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 10f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.transform.forward * Time.deltaTime) * 10f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
             if (Mouse.current.rightButton.isPressed)
             {
-                GorillaLocomotion.Player.Instance.transform.position += (GorillaLocomotion.Player.Instance.headCollider.transform.forward * Time.deltaTime) * 10f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += (GorillaLocomotion.GTPlayer.Instance.headCollider.transform.forward * Time.deltaTime) * 10f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
         }
 
@@ -770,12 +740,12 @@ namespace StupidTemplate.Mods
         {
             if (ControllerInputPoller.instance.rightGrab)
             {
-                Player.Instance.transform.position += GorillaLocomotion.Player.Instance.headCollider.transform.up * Time.deltaTime * 8f;
+                Player.Instance.transform.position += GorillaLocomotion.GTPlayer.Instance.headCollider.transform.up * Time.deltaTime * 8f;
                 Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
             if (ControllerInputPoller.instance.leftGrab)
             {
-                Player.Instance.transform.position += GorillaLocomotion.Player.Instance.headCollider.transform.up * Time.deltaTime * -8f;
+                Player.Instance.transform.position += GorillaLocomotion.GTPlayer.Instance.headCollider.transform.up * Time.deltaTime * -8f;
                 Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             }
         }
@@ -785,8 +755,8 @@ namespace StupidTemplate.Mods
         {
             if (ControllerInputPoller.instance.rightControllerPrimaryButton)
             {
-                GorillaLocomotion.Player.Instance.transform.position += GorillaLocomotion.Player.Instance.headCollider.transform.forward * Time.deltaTime * 17f;
-                GorillaLocomotion.Player.Instance.GetComponent<Rigidbody>().velocity = GorillaLocomotion.Player.Instance.rightControllerTransform.forward * 20f;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += GorillaLocomotion.GTPlayer.Instance.headCollider.transform.forward * Time.deltaTime * 17f;
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<Rigidbody>().velocity = GorillaLocomotion.GTPlayer.Instance.rightControllerTransform.forward * 20f;
                 foreach (MeshCollider meshCollider in Resources.FindObjectsOfTypeAll<MeshCollider>())
                 {
                     meshCollider.enabled = false;
@@ -800,24 +770,7 @@ namespace StupidTemplate.Mods
                 }
             }
         }
-        public static void flush()
-        {
-            GorillaNot.instance.rpcCallLimit = 99999999;
-            GorillaNot.instance.rpcErrorMax = 99999999;
-            GorillaNot.instance.rpcCallLimit = 99999999;
-            PhotonNetwork.RemoveRPCs(PhotonNetwork.LocalPlayer);
-            GorillaNot.instance.rpcCallLimit = 99999999;
-            GorillaNot.instance.rpcErrorMax = 99999999;
-            GorillaNot.instance.rpcCallLimit = 99999999;
-            PhotonNetwork.RemoveRPCs(PhotonNetwork.LocalPlayer);
-            GorillaNot.instance.rpcCallLimit = 9999;
-            PhotonNetwork.RemoveRPCs(PhotonNetwork.LocalPlayer);
-            PhotonNetwork.OpRemoveCompleteCache();
-            PhotonNetwork.SendAllOutgoingCommands();
-            PhotonNetwork.RemoveRPCsInGroup(666);
-            PhotonNetwork.RemoveRPCsInGroup(666);
-            PhotonNetwork.RemoveRPCs(PhotonNetwork.LocalPlayer);
-        }
+
 
     }
 }
